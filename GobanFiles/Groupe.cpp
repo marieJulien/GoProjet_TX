@@ -1,5 +1,6 @@
 #include "groupe.h"
 #include "pierre.h"
+#include "Goban.h"
 #include "../Tools/CoupException.h"
 
 using namespace std;
@@ -10,11 +11,66 @@ Groupe::Groupe() : statut(0)
 
 unsigned int Groupe::nbLibertes() const
 {
-    unsigned int result=0;
-    for (vector<boost::shared_ptr<Pierre> >::const_iterator it = m_pierres.begin(); it != m_pierres.end() ; ++it)
-        result += (*it)->libertes();
+    //unsigned int result=0;
+    set<pair<int,int> > libertes;
 
-    return result;
+
+    for (vector<boost::shared_ptr<Pierre> >::const_iterator it = m_pierres.begin(); it != m_pierres.end() ; ++it)
+    {
+        std::vector<pair<int,int> > libertesPierre = (*it)->libertes();
+        for(std::vector<pair<int,int> >::iterator it_l = libertesPierre.begin(); it_l != libertesPierre.end(); it_l++)
+        {
+            if (libertes.find(*it_l)==libertes.end())
+                libertes.insert(*it_l);
+        }
+    }
+
+    return libertes.size();
+}
+
+//renvoie le nombre de libertés internes du groupe
+unsigned int Groupe::nbLibertesInternes() const
+{
+    //unsigned int result=0;
+    set<pair<int,int> > libertes;
+    map<pair<int,int>, boost::shared_ptr<Pierre> > plateau = m_goban.lock()->getPlateau();
+
+    //pour chaque pierre du groupe
+    for (vector<boost::shared_ptr<Pierre> >::const_iterator it = m_pierres.begin(); it != m_pierres.end() ; ++it)
+    {
+        std::vector<pair<int,int> > libertesPierre = (*it)->libertes();
+
+        //pour chaque liberté de la pierre
+        for(std::vector<pair<int,int> >::iterator it_l = libertesPierre.begin(); it_l != libertesPierre.end(); it_l++)
+        {
+            //si on a pas déjà regardé cette liberté
+            if (libertes.find(*it_l)==libertes.end())
+            {
+                int abs = it_l->first, ord = it_l->second;
+                vector<pair<int,int> > adj = m_goban.lock()->intersectionsAdjacentes(abs,ord);
+                bool interne = true;
+                for(vector<pair<int,int> >::iterator it_adj = adj.begin(); it_adj != adj.end(); it_adj++)
+                {
+                    if (plateau.find(*it_adj)!=plateau.end())
+                    {
+                        //il y a une pierre à côté de l'intersection
+                        boost::shared_ptr<Pierre> pierrePtr = (*(plateau.find(*it_adj))).second;
+                        if (pierrePtr->couleur()!=couleur())
+                        {
+                            //cette pierre appartient à l'adversaire -> pas une liberté interne
+                            interne = false;
+                        }
+                    }
+                }
+
+                //si cette liberté est une liberté interne, on l'ajoute au résultat
+                if (interne)
+                    libertes.insert(*it_l);
+            }
+        }
+    }
+
+    return libertes.size();
 }
 
 bool Groupe::faitPartie(const boost::shared_ptr<Pierre> p) const

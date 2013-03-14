@@ -1,7 +1,6 @@
 SOURCES += \
     main.cpp \
     \
-    Tools\Debug.cpp \
     \
     FenetrePrincipale\ActionNext.cpp \
     FenetrePrincipale\BoutonGoban.cpp \
@@ -26,7 +25,8 @@ SOURCES += \
     GobanFiles/GobanIA.cpp \
     Partie/PartieIA.cpp \
     IA/IA.cpp \
-    IA/User.cpp
+    IA/User.cpp \
+    FenetrePrincipale/ResultatPartie.cpp
 
 
 
@@ -35,7 +35,6 @@ SOURCES += \
 HEADERS += \
     main.h \
     \
-    Tools\debug.h \
     \
     FenetrePrincipale/FenetrePrincipale.h \
     FenetrePrincipale/FenetreJeu.h \
@@ -61,7 +60,8 @@ HEADERS += \
     Partie/PartieIA.h \
     GobanFiles/GobanIA.h \
     IA/IA.h \
-    IA/User.h
+    IA/User.h \
+    FenetrePrincipale/ResultatPartie.hpp
 
 
 FORMS +=

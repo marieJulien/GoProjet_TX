@@ -9,34 +9,44 @@
 #include "groupe.h"
 #include "../Partie/Partie.h"
 
+/** Classe qui représente le plateau : elle possède un ensemble de groupes de pierres
+  *
+  */
+
 class Goban : public QGraphicsScene, public boost::enable_shared_from_this<Goban>
 {
 public :
     Goban(double ecart, int size=19);
     Goban(Goban const& g);
 
+    //outils pour le jeu : ajout/suppression d'une pierre, etc
     std::vector<boost::shared_ptr<Pierre> > ajouterPierre(boost::shared_ptr<Pierre> p, bool trueGoban=true); //renvoie les pierres qui ont été supprimées du goban
     std::vector<boost::shared_ptr<Pierre> > pierresSansLibertes() const;
     std::set<boost::shared_ptr<Groupe> > groupesSansLiberte() const;
+    std::vector<std::pair<int,int> > intersectionsAdjacentes(int abs, int ord);
+    void supprimerPierre(boost::shared_ptr<Pierre> p);
+    bool estSurPlateau(boost::shared_ptr<Pierre> p) const;
 
     // GETTERS
+    //getPlateau : reconstitue une map représentant le plateau à partir du set de groupes
     std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > getPlateau() const;
+    int getCourant() {return m_courant;}
+    std::set<boost::shared_ptr<Groupe> >& getGroupes() {return m_groupes;}
+
+    //getters dessin
     QBrush getBrushFonce() const {return Goban::fondFonce;}
     QBrush getBrushMoyen() const {return fondMoyen;}
     QBrush getBrushClair() const {return fondClair;}
     QBrush getBrushSansMotif() const {return sansMotif;}
     static QPen getRouge();
     QGraphicsItemGroup* getLignes() const {return lignes;}
-    //partie::iterateur getCourant() {return courant;}
-    int getCourant() {return m_courant;}
     boost::shared_ptr<QGraphicsEllipseItem> getCoupCourant() {return coupCourant;}
-    std::set<boost::shared_ptr<Groupe> >& getGroupes() {return m_groupes;}
-
-    ~Goban() {/*delete lignes;*/}
 
 
-    void supprimerPierre(boost::shared_ptr<Pierre> p);
-    bool estSurPlateau(boost::shared_ptr<Pierre> p) const;
+    ~Goban() {}
+
+
+
     void init();
     void avancer() {++m_courant;}
     void reculer() {--m_courant;}
@@ -56,33 +66,37 @@ public :
     boost::shared_ptr<Partie> getPartie() const {return m_partie;}
     void setPartie(boost::shared_ptr<Partie> p) {m_partie = p;}
 
-    bool hasPartie() const {return m_hasPartie;}
-    void setHasPartie(bool p) {m_hasPartie=p;}
-
 protected :
-    std::string m_name; //"SGF" ou "JEU"
-    bool m_hasPartie;
+    std::string m_name; //"SGF" ou "JEU" -> useless ?
 
+    //outils pour dessiner la GraphicScene
     static QBrush noir;
     static QBrush blanc;
     static QPen pen;
     static QPen rouge;
     QGraphicsItemGroup* lignes;
 
-    std::set<boost::shared_ptr<Groupe> > m_groupes;
-
-    boost::shared_ptr<QGraphicsEllipseItem> coupCourant;
-    int m_courant;
+    //couleurs de fond du goban, parce que c'est cool de pouvoir la changer
     QBrush fondClair;
     QBrush fondMoyen;
     QBrush fondFonce;
     QBrush sansMotif;
-    QString logMsg;
 
-    unsigned int M_SIZE;
-    double M_ECART;
 
-    boost::shared_ptr<Partie> m_partie;
+    //pour le jeu en lui-même :
+    std::set<boost::shared_ptr<Groupe> > m_groupes; //ensemble des groupes présents sur le goban
+    boost::shared_ptr<Partie> m_partie; //partie posée sur le plateau
+    boost::shared_ptr<QGraphicsEllipseItem> coupCourant; //cercle rouge pour indiquer le dernier coup joué
+    int m_courant; //indice du dernier coup joué, dans le vecteur de coups de la classe Partie
+
+
+
+    QString logMsg; //useless, sûrement à supprimer
+
+    unsigned int M_SIZE; //taille du goban : classiquement 9, 13 ou 19 (nombre de lignes)
+    double M_ECART; //écart entre deux lignes (en pixels), utilisé pour calculer la taille des pierres par ex
+
+
 };
 
 #endif // GOBAN_H

@@ -67,22 +67,9 @@ bool GobanIA::coupPossible(int abs, int ord)
 
             return true;
 
-//            if (p->getGroupe().get()!=0)
-//            {
-////                if (p->getGroupe()->nbLibertes()==0)
-////                {
-////                    std::cout << "Groupe auquel la pierre ajoutée appartient n'a pas de libertés\n";
-////                    return false;
-////                }
 
-//                std::cout << "coup possible !\n";
-//                return true;
-//            }
-//            else throw coup_exception("Erreur pierre mal ajoutée au goban copie");
-//            m_copie.reset();
         }
 
-//        return true;
         ///TODO à terminer
     }
     catch(std::exception const& e)

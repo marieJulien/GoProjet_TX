@@ -15,11 +15,16 @@ QPen Goban::getRouge()
     return rouge;
 }
 
-
-Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(size), M_ECART(ecart), m_hasPartie(false)
+/** Constructeur de la classe Goban : construit la graphicScene à partir de size et ecart
+  *
+  */
+Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(size), M_ECART(ecart)
 {
-    //brush pour la couleur de fond
+    //création d'une nouvelle partie par défaut
     m_partie.reset(new Partie());
+
+    ///CREATION DE LA GRAPHIC SCENE :
+    //brush pour la couleur de fond
     fondClair = QBrush(QPixmap("Images/fondBoisClair.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     fondMoyen = QBrush(QPixmap("Images/fondBois.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     fondFonce = QBrush(QPixmap("Images/fondBoisFonce.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
@@ -35,7 +40,7 @@ Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(s
     //ajout des hoshi
     QPen penE(Qt::black,5);
 
-    /// HOSHIS à placer en fonction de la taille du goban
+    ///HOSHIS à placer en fonction de la taille du goban
     switch (M_SIZE)
     {
     case 19 :
@@ -93,10 +98,22 @@ void Goban::init()
     m_groupes.clear();
 }
 
+
+/** Ajout de la pierre p au plateau
+  * le booléen trueGoban sert à vérifier qu'on ajoute sur la pierre sur le plateau réel
+  * ou sur une copie de plateau (pour tester qu'un coup est possible par exemple)
+  *
+  * On part du principe que le coup est possible (vérification à faire AVANT d'appeler cette méthode).
+  * Dans un premier temps on va chercher à fusionner éventuellement des groupes de pierres :
+  *     On récupère les pierres autour de la nouvelle pierre posée, on regarde leur couleur et le groupe
+  *     auquel elles appartiennent, et on fusionne si nécessaire.
+  *     S'il n'y a aucune pierre de la même couleur autour de p, on doit créer un nouveau groupe qui contient p.
+  *
+  * Dans un deuxième temps on regarde si on a capturé des pierres adverses en posant p.
+  */
 vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre> p, bool trueGoban)
 {
     std::cout << "\n\n- - - - - - - Debut ajouter pierre (p)\n\n";
-    /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
     const int ord = p->getCoup().getOrd();
     const int abs = p->getCoup().getAbs();
 
@@ -106,6 +123,8 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     cout << pierresAutour.size() << " pierres autour de la même couleur\n";
     vector<boost::shared_ptr<Groupe> > groupesAutour;
 
+    //on récupère les groupes adjacents à p dans le vector groupesAutour : pour chaque pierre autour de p, on regarde
+    //à quel groupe elle appartient
     for (vector<boost::shared_ptr<Pierre> >::iterator it = pierresAutour.begin(); it != pierresAutour.end(); it++)
     {
         boost::shared_ptr<Groupe> m_groupe = (*it)->getGroupe();
@@ -123,6 +142,8 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
         boost::shared_ptr<Groupe> groupePtr(new Groupe());
         groupePtr->ajouterPierre(p);
         p->setGroupe(groupePtr->shared_from_this());
+
+        //on ajoute le nouveau groupe à m_groupes
         m_groupes.insert(groupePtr);
         groupePtr->setGoban(shared_from_this());
         std::cout << "ajout au nouveau groupe ok" << std::endl;
@@ -157,12 +178,14 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
         coupCourant->setZValue(10);
         std::cout << "Ajout du coup courant\n";
     }
+    //si le goban sur lequel on ajoute p n'est pas un "vrai goban" (si c'est une copie réalisée pour tester),
+    //on ne va pas chercher à afficher la pierre à l'écran
 
 
     /************************* Suppression des pierres *********************************************/
     vector<boost::shared_ptr<Pierre> > pierresSupprimees;
     set<boost::shared_ptr<Groupe> > sansLibertes = groupesSansLiberte();
-
+    //on récupère toutes les chaînes sans liberté présentes sur le plateau
 
     if (sansLibertes.size()>0)
     {
@@ -207,11 +230,7 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
 
 void Goban::supprimerPierre(boost::shared_ptr<Pierre> p)
 {
-    int a = p->getCoup().getAbs();
-    int o = p->getCoup().getOrd();
-
     removeItem(p->getEllipse().get());
-    //delete p;
 }
 
 
@@ -230,7 +249,7 @@ vector<boost::shared_ptr<Pierre> > Goban::pierresSansLibertes() const
 
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::iterator it = plateau.begin(); it !=plateau.end(); ++it)
     {
-        if (it->second->libertes()==0)
+        if (it->second->libertes().size()==0)
         {
             result.push_back(it->second);
         }
@@ -251,6 +270,8 @@ set<boost::shared_ptr<Groupe> > Goban::groupesSansLiberte() const
     return result;
 }
 
+
+//affichage pour du debug, mais le résultat est juste dégueu
 std::string Goban::printPlateau() const
 {
     std::ostringstream result;
@@ -292,4 +313,33 @@ std::map<std::pair<int,int>,boost::shared_ptr<Pierre> >  Goban::getPlateau() con
     }
 
     return result;
+}
+
+
+//renvoie un vector de pair<abscisse, ordonnée> qui représente les intersections adjacentes à une intersection donnée
+//dépend de la taille du goban M_SIZE
+std::vector<std::pair<int,int> > Goban::intersectionsAdjacentes(int abs, int ord)
+{
+    vector<pair<int, int> > resultat;
+
+    resultat.push_back(pair<int,int>(abs,ord+1));
+    resultat.push_back(pair<int,int>(abs,ord-1));
+    resultat.push_back(pair<int,int>(abs+1,ord));
+    resultat.push_back(pair<int,int>(abs-1,ord));
+
+    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end();)
+    {
+        int a = it->first; int o = it->second;
+        if (a<0 || a>=SIZE())
+        {
+            it = resultat.erase(it);
+        }
+        else if (o<0 || o>=SIZE())
+        {
+            it = resultat.erase(it);
+        }
+        else it++;
+    }
+
+    return resultat;
 }

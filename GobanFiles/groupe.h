@@ -21,6 +21,7 @@ public :
     Groupe(boost::shared_ptr<Groupe> groupePtr);
     int getStatut() const {return statut;}
     unsigned int nbLibertes() const;
+    unsigned int nbLibertesInternes() const;
     std::vector<boost::shared_ptr<Pierre> >& getPierres() {return m_pierres;}
     void capture();
     void ajouterPierre(boost::shared_ptr<Pierre> p);

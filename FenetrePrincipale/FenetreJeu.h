@@ -11,6 +11,12 @@ class FenetreJeu : public FenetrePrincipale
 public :
     FenetreJeu();
     void init();
+    void tourIA();
+    boost::shared_ptr<FenetreJeu> sharedFromThis_Jeu()
+    {
+        std::cout << "OOOOOOOOOO";
+        return  boost::shared_dynamic_cast<FenetreJeu,FenetrePrincipale>(shared_from_this());
+    }
 
 public slots :
     void bouton_goban(int a, int o);

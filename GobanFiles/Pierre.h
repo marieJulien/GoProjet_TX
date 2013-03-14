@@ -25,12 +25,12 @@ public :
     boost::shared_ptr<Groupe> getGroupe() {return m_groupe.lock();}
     std::string getName() const {return m_name;}
 
-    int libertes() const;
+    std::vector<std::pair<int,int> >  libertes() const;
     std::vector<std::pair<int,int> > intersectionsAdjacentes() const;
     std::vector<std::pair<int,int> > intersectionsAdjacentes(int gobanSize) const;
     std::vector<boost::shared_ptr<Pierre> > pierresAutourMemeCouleur() const;
 
-    int libertes(boost::shared_ptr<Goban> gobanPtr) const;
+    std::vector<std::pair<int,int> > libertes(boost::shared_ptr<Goban> gobanPtr) const;
     std::vector<std::pair<int,int> > intersectionsAdjacentes(boost::shared_ptr<Goban> gobanPtr) const;
     std::vector<boost::shared_ptr<Pierre> > pierresAutourMemeCouleur(boost::shared_ptr<Goban> gobanPtr) const;
 

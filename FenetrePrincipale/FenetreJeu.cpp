@@ -3,6 +3,7 @@
 #include "../GobanFiles/GobanIA.h"
 #include "../IA/IA.h"
 #include "../Tools/CoupException.h"
+#include "ResultatPartie.hpp"
 
 FenetreJeu::FenetreJeu() : FenetrePrincipale()
 {
@@ -21,6 +22,7 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
     /********* Définition d'une grille de boutons correspondant aux intersections *********/
     grilleBoutonsGoban =new QGridLayout();
     for (unsigned int i = 0; i<m_goban->SIZE(); i++)
+    {
         for (unsigned int j = 0; j<m_goban->SIZE(); j++)
         {
             BoutonGoban* bouton =new BoutonGoban(i,j,m_goban);
@@ -28,6 +30,7 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
             connect(bouton,SIGNAL(clicked()),bouton,SLOT(envoyerSignalClicked()));
             connect(bouton,SIGNAL(clickedBouton(int,int)),this,SLOT(bouton_goban(int,int)));
         }
+    }
     grilleBoutonsGoban->setSpacing(0);
     grilleBoutonsGoban->setMargin(ECART/2);
     vue->setLayout(grilleBoutonsGoban);
@@ -76,7 +79,7 @@ void FenetreJeu::bouton_goban(int a, int o)
         std::cout << "Clicked : " << a << "-" << o << std::endl;
         boost::shared_ptr<GobanIA> gobanPtr = boost::dynamic_pointer_cast<GobanIA>(m_goban);
 
-        if (!gobanPtr->getPartieIA()->partieFinie())
+        if (!gobanPtr->getPartieIA()->partieFinie(gobanPtr))
         {
             if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
             {
@@ -89,18 +92,13 @@ void FenetreJeu::bouton_goban(int a, int o)
                     c.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
                     gobanPtr->getPartieIA()->ajouterCoup(c);
                     boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,gobanPtr->ECART()));
-                    gobanPtr->ajouterPierre(pierrePtr);
+                    int nbPierresCapturees = gobanPtr->ajouterPierre(pierrePtr).size();
+                    joueurUser->addCapt(nbPierresCapturees);
 
                     std::cout << "coup de l'utilisateur : ok, maintenant choix de l'ia\n";
 
                     //ensuite, l'IA doit choisir un coup
-                    std::pair<int,int> coupIA = gobanPtr->getPartieIA()->getIA()->choixCoup();
-                    std::cout << "Choix de l'ia : " << coupIA.first << " - " << coupIA.second << std::endl;
-                    Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
-                    c2.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
-                    gobanPtr->getPartieIA()->ajouterCoup(c2);
-                    boost::shared_ptr<Pierre> pierre2 (new Pierre(c2,gobanPtr->ECART()));
-                    gobanPtr->ajouterPierre(pierre2);
+                    tourIA();
                 }
                 else
                 {
@@ -132,5 +130,104 @@ void FenetreJeu::abandon()
 
 void FenetreJeu::passer()
 {
+    try
+    {
+        std::cout << "Clicked : PASS" << std::endl;
+        boost::shared_ptr<GobanIA> gobanPtr = boost::dynamic_pointer_cast<GobanIA>(m_goban);
 
+        if (!gobanPtr->getPartieIA()->partieFinie(gobanPtr))
+        {
+            if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
+            {
+                //si c'est bien à l'utilisateur de jouer
+
+                Coup dernierCoup = gobanPtr->getPartieIA()->getListeCoups().back();
+                if (dernierCoup.getAbs()==-1)
+                {
+                    //l'IA a passé au coup d'avant : deux passes de suite = fin de la partie, il faut compter les points
+                    //pas encore géré
+                    //compter les scores, afficher une fenêtre d'info
+                    std::cout << "AAAAAAAAAAAAAAAAA\n";
+                    try
+                    {
+                        ResultatPartie* res = new ResultatPartie(sharedFromThis_Jeu());
+                        std::cout << "EEEEEEEEEEEEE";
+                        res->show();
+                    }
+                    catch(std::exception const& e)
+                    {
+                        std::cout << e.what();
+                        throw coup_exception(e.what());
+                    }
+                }
+                else
+                {
+                    boost::shared_ptr<Joueur> joueurUser = gobanPtr->getPartieIA()->getJoueur(gobanPtr->getPartieIA()->couleurAJouer());
+                    Coup c(-1,-1,joueurUser);
+                    c.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
+                    gobanPtr->getPartieIA()->ajouterCoup(c);
+
+                    //au tour de l'IA
+                    tourIA();
+                }
+            }
+        }
+        else
+        {
+            std::cout << gobanPtr->getPartieIA()->resultat(gobanPtr);
+        }
+    }
+    catch(std::exception const& e)
+    {
+        throw coup_exception(e.what());
+    }
+}
+
+
+void FenetreJeu::tourIA()
+{
+    boost::shared_ptr<GobanIA> gobanPtr = boost::dynamic_pointer_cast<GobanIA>(m_goban);
+
+    //l'IA doit choisir un coup
+    std::pair<int,int> coupIA = gobanPtr->getPartieIA()->getIA()->choixCoup();
+    std::cout << "Choix de l'ia : " << coupIA.first << " - " << coupIA.second << std::endl;
+    if ((coupIA.first==-1) && (coupIA.second==-1))
+    {
+        //L'IA a considéré que la partie était terminée = passer
+        Coup dernierCoup = gobanPtr->getPartieIA()->getListeCoups().back();
+        if (dernierCoup.getAbs()==-1)
+        {
+            //deux pass de suite -> fin de la partie
+            //std::cout << gobanPtr->getPartieIA()->resultat(gobanPtr);
+            //throw coup_exception("Deux passes de suite, fin de la partie !"+gobanPtr->getPartieIA()->resultat(gobanPtr));
+            std::cout << "AAAAAAAAAAAAAAAAA\n";
+            try
+            {
+                ResultatPartie* res = new ResultatPartie(sharedFromThis_Jeu());
+                std::cout << "EEEEEEEEEEEEE";
+                res->show();
+            }
+            catch(std::exception const& e)
+            {
+                std::cout << e.what();
+                throw coup_exception(e.what());
+            }
+        }
+        else
+        {
+            Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
+            c2.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
+            gobanPtr->getPartieIA()->ajouterCoup(c2);
+        }
+
+    }
+    else
+    {
+        Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
+        c2.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
+        gobanPtr->getPartieIA()->ajouterCoup(c2);
+        boost::shared_ptr<Pierre> pierre2 (new Pierre(c2,gobanPtr->ECART()));
+        int nbPierresCapturees = gobanPtr->ajouterPierre(pierre2).size();
+        gobanPtr->getPartieIA()->getIA()->addCapt(nbPierresCapturees);
+    }
 }

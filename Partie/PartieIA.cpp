@@ -17,7 +17,6 @@ void PartieIA::init(boost::shared_ptr<GobanIA> gobanPtr)
 
     try
     {
-//        std::cout << "hmhmhm\n";
         if (m_couleurIA=="noir")
         {
             m_joueurNoir.reset(new IA(sharedFromThis(),gobanPtr,"noir"));
@@ -25,7 +24,6 @@ void PartieIA::init(boost::shared_ptr<GobanIA> gobanPtr)
         }
         else
         {
-//            std::cout << "hmmmm" << std::endl;
 
             m_joueurBlanc.reset(new IA(sharedFromThis(),gobanPtr,"blanc"));
             m_joueurNoir.reset(new User(sharedFromThis(),gobanPtr,"noir"));
@@ -82,4 +80,72 @@ std::string PartieIA::couleurAJouer()
 boost::shared_ptr<PartieIA> PartieIA::sharedFromThis()
 {
     return boost::shared_dynamic_cast<PartieIA,Partie>(shared_from_this());
+}
+
+bool PartieIA::partieFinie(boost::shared_ptr<GobanIA> gobanPtr)
+{
+    //std::cout << "partie finie ?\n"; return false;
+    if (gobanPtr->getGroupes().size()==0) return false;
+    if (m_coups.size() >= 2)
+        if ((m_coups.at(m_coups.size()-1).getAbs()==-1) && (m_coups.at(m_coups.size()-2).getAbs()==-1))
+            return true;
+
+    for(std::set<boost::shared_ptr<Groupe> >::iterator it = gobanPtr->getGroupes().begin(); it != gobanPtr->getGroupes().end(); it++)
+    {
+        boost::shared_ptr<Groupe> groupePtr = *it;
+        if (groupePtr->nbLibertes()!=2)
+        {
+            return false;
+        }
+    }
+
+    return true;
+
+}
+
+
+std::string PartieIA::resultat(boost::shared_ptr<GobanIA> goban)
+{
+    double pointsIA = 0, pointsUser = 0;
+    boost::shared_ptr<IA> IA = getIA();
+    boost::shared_ptr<User> User = getUser();
+
+    for(std::set<boost::shared_ptr<Groupe> >::iterator it = goban->getGroupes().begin(); it != goban->getGroupes().end(); it++)
+    {
+        boost::shared_ptr<Groupe> groupePtr = *it;
+        int libertesInternes = groupePtr->nbLibertesInternes();
+        if (groupePtr->couleur()==IA->couleur())
+        {
+            pointsIA += libertesInternes;
+        }
+        else if (groupePtr->couleur()==User->couleur())
+        {
+            pointsUser += libertesInternes;
+        }
+    }
+
+    double terrUser = pointsUser, terrIA = pointsIA;
+
+    pointsIA += IA->getCapt();
+    pointsUser += User->getCapt();
+
+    if (IA->couleur()=="blanc") pointsIA += m_komi;
+    else pointsUser += m_komi;
+
+    std::ostringstream resultat;
+    resultat << "Fin de la partie : ";
+    if (pointsIA > pointsUser) resultat << "victoire de l'IA (" << IA->couleur() << ") de " << (pointsIA - pointsUser) << std::endl;
+    else resultat << "victoire de l'utilisateur (" << User->couleur() << ") de " << (pointsUser - pointsIA) << std::endl;
+    resultat << "Utilisateur (" << User->couleur() << ") : "
+             << pointsUser << " points (territoire : "
+             << terrUser << ", prisonniers : " << User->getCapt();
+    if (User->couleur()=="blanc") resultat << ", komi : " << m_komi;
+    resultat << ")" << std::endl;
+    resultat << "IA (" << IA->couleur() << ") : "
+             << pointsIA << " points (territoire : "
+             << terrIA << ", prisonniers : " << IA->getCapt();
+    if (IA->couleur()=="blanc") resultat << ", komi : " << m_komi;
+    resultat << ")" << std::endl;
+
+    return resultat.str();
 }

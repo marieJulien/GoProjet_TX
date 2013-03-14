@@ -36,24 +36,6 @@ void Pierre::setEllipse(boost::shared_ptr<QGraphicsPixmapItem> el)
 }
 
 
-int Pierre::libertes() const
-{
-    vector<pair<int,int> > adj = intersectionsAdjacentes();
-    std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = m_groupe.lock()->getGoban()->getPlateau();
-
-    int libertes = adj.size();
-    for (std::vector<std::pair<int,int> >::iterator it = adj.begin(); it != adj.end(); it++)
-    {
-        if (plateau.find(*it)!=plateau.end())
-        {
-            libertes--;
-        }
-    }
-
-//    std::cout << "\nNombre de libertés : " << libertes << std::endl;
-    return libertes;
-}
-
 vector<pair<int,int> > Pierre::intersectionsAdjacentes() const
 {
     vector<pair<int, int> > resultat;
@@ -133,21 +115,45 @@ vector<boost::shared_ptr<Pierre> > Pierre::pierresAutourMemeCouleur() const
 }
 
 
-int Pierre::libertes(boost::shared_ptr<Goban> gobanPtr) const
+std::vector<pair<int,int> > Pierre::libertes(boost::shared_ptr<Goban> gobanPtr) const
 {
     vector<pair<int,int> > adj = intersectionsAdjacentes(gobanPtr);
-    int libertes = adj.size();
+    //int libertes = adj.size();
     std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = gobanPtr->getPlateau();
 
-    for (std::vector<std::pair<int,int> >::iterator it = adj.begin(); it != adj.end(); it++)
+    for (std::vector<std::pair<int,int> >::iterator it = adj.begin(); it != adj.end(); )
     {
         if (plateau.find(*it)!=plateau.end())
         {
-            libertes--;
+            //libertes--;
+            it = adj.erase(it);
         }
+        else it++;
     }
 
-    return libertes;
+    //return libertes;
+    return adj;
+}
+
+std::vector<pair<int,int> > Pierre::libertes() const
+{
+    boost::shared_ptr<Goban> gobanPtr = m_groupe.lock()->getGoban();
+    vector<pair<int,int> > adj = intersectionsAdjacentes(gobanPtr);
+    //int libertes = adj.size();
+    std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = gobanPtr->getPlateau();
+
+    for (std::vector<std::pair<int,int> >::iterator it = adj.begin(); it != adj.end(); )
+    {
+        if (plateau.find(*it)!=plateau.end())
+        {
+            //libertes--;
+            it = adj.erase(it);
+        }
+        else it++;
+    }
+
+    //return libertes;
+    return adj;
 }
 
 vector<pair<int,int> > Pierre::intersectionsAdjacentes(boost::shared_ptr<Goban> gobanPtr) const

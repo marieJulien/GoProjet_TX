@@ -17,6 +17,9 @@ std::pair<int,int> IA::choixCoup()
     int abs = -1, ord = -1;
     int i = 1;
 
+
+    if (m_partie.lock()->partieFinie(m_goban.lock())) return std::pair<int,int>(abs,ord);
+
     while (!(m_goban.lock()->coupPossible(abs,ord)) && (i!=100))
     {
         std::cout << "Essai numéro " << i << "\n";
@@ -32,7 +35,8 @@ std::pair<int,int> IA::choixCoup()
     if (i==100)
     {
         std::cout << "\n\nAUCUN COUP A JOUER POUR L'IA\n\n";
-        throw coup_exception("Impossible de trouver un coup à jouer pour l'IA\n");
+        abs = -1; ord = -1;
+        //throw coup_exception("Impossible de trouver un coup à jouer pour l'IA\n");
     }
 
     return std::pair<int,int>(abs,ord);
