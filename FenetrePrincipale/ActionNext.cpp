@@ -1,27 +1,27 @@
 #include "ActionNext.h"
-#include "../Tools/debug.h"
+//#include "../Tools/debug.h"
 #include "../GobanFiles/GobanManager.h"
 
 using namespace std;
 
 ActionNext::ActionNext() : QUndoCommand()
 {
-    SGF::Debug::getInstance()->add(SGF::Normal,"ActionNext::constructeur\n");
+    //SGF::Debug::getInstance()->add(SGF::Normal,"ActionNext::constructeur\n");
 }
 
 ActionNext::ActionNext(boost::shared_ptr<FenetreSGF> f) : QUndoCommand()
 {
     fp = boost::weak_ptr<FenetreSGF>(f);
-    SGF::Debug::getInstance()->add(SGF::Normal,"ActionNext::constructeur\n");
+    //SGF::Debug::getInstance()->add(SGF::Normal,"ActionNext::constructeur\n");
 }
 
 void ActionNext::undo()
 {
     boost::shared_ptr<Goban> g = fp.lock()->getGoban();
     boost::shared_ptr<Partie> p = fp.lock()->getGoban()->getPartie();
-    SGF::Debug* dbg = SGF::Debug::getInstance();
+    //SGF::Debug* dbg = SGF::Debug::getInstance();
     //dbg->add(SGF::Normal,"\n == Undo ==");
-    *dbg << "\n == Undo ==";
+    //*dbg << "\n == Undo ==";
 
     //partie* Partie = fp->getPartie();
 
@@ -30,13 +30,13 @@ void ActionNext::undo()
     try
     {
         g->supprimerPierre(m_pierre);
-        dbg->add(SGF::Normal,"Suppression de la pierre : "+m_pierre->getCoup().print());
+        //dbg->add(SGF::Normal,"Suppression de la pierre : "+m_pierre->getCoup().print());
 
         if (pierresSupprimees.size()!=0)
         {
             for (vector<boost::shared_ptr<Pierre> >::iterator it = pierresSupprimees.begin(); it!=pierresSupprimees.end(); ++it)
             {
-                dbg->add(SGF::Normal,"Rajout de la pierre : "+(*it)->getCoup().print());
+                //dbg->add(SGF::Normal,"Rajout de la pierre : "+(*it)->getCoup().print());
                 g->ajouterPierre(*it);
             }
         }
@@ -58,20 +58,20 @@ void ActionNext::undo()
     {
         std::ostringstream os;
         os << "Fichier " << __FILE__ << " ligne " << __LINE__ << " : " << e.what();
-        dbg->add(SGF::Exception,os.str());
+        //dbg->add(SGF::Exception,os.str());
     }
 
-    dbg->add(SGF::Normal,"== fin Undo ==\n");
+    //dbg->add(SGF::Normal,"== fin Undo ==\n");
 }
 
 void ActionNext::redo()
 {
-    SGF::Debug* dbg = SGF::Debug::getInstance();
+    //SGF::Debug* dbg = SGF::Debug::getInstance();
 
     try
     {
         cout << "REDO\n";
-        dbg->add(SGF::Normal, "\n-- (Re)do --");
+        //dbg->add(SGF::Normal, "\n-- (Re)do --");
         //boost::shared_ptr<partie> Partie = fp->getPartie();
         boost::shared_ptr<Goban> goban = fp.lock()->getGoban();
         ostringstream os;
@@ -83,7 +83,7 @@ void ActionNext::redo()
                 boost::shared_ptr<Partie> partie = goban->getPartie();
                 Coup c = partie->getCoup(goban->getCourant());
                 cout << "Coup : "<< c.print() << endl;
-                dbg->add(SGF::Normal, c.print());
+                //dbg->add(SGF::Normal, c.print());
                 int ecartGoban = goban->ECART();
                 boost::shared_ptr<Pierre> p (new Pierre(c, ecartGoban)); //on récupère l'itérateur courant
                 cout << "Pierre créée\n";
@@ -93,7 +93,7 @@ void ActionNext::redo()
                 pierreCreee << "Création de la pierre : " << p->getCoup().getJoueur()->couleur()
                             << " en " << p->getCoup().getAbs()
                             << "-" << p->getCoup().getOrd() << "\n";
-                SGF::Debug::getInstance()->add(SGF::Normal,pierreCreee.str());
+                //SGF::Debug::getInstance()->add(SGF::Normal,pierreCreee.str());
                 cout << pierreCreee.str();
                 os << p->getCoup().getNum();
                 fp.lock()->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup().getComm());
@@ -140,15 +140,15 @@ void ActionNext::redo()
 
         //os << "\n" << goban->getLogMsg().toStdString();
         setText(QString::fromStdString(os.str()));
-        dbg->add(SGF::Normal,fp.lock()->getGoban()->printPlateau());
+        //dbg->add(SGF::Normal,fp.lock()->getGoban()->printPlateau());
 
-        dbg->add(SGF::Normal,"--Fin Redo\n");
+        //dbg->add(SGF::Normal,"--Fin Redo\n");
     }
     catch (std::exception const& e)
     {
         std::ostringstream os;
         os << "Fichier " << __FILE__ << " ligne " << __LINE__ << " : " << e.what();
-        dbg->add(SGF::Exception,os.str());
+        //dbg->add(SGF::Exception,os.str());
     }
 }
 

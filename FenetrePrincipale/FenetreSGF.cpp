@@ -33,14 +33,14 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
 
     std::ostringstream os;
     os << "Taille de l'écran : " << m_height << std::endl;
-    SGF::Debug::getInstance()->add(SGF::Normal,os.str());
+    //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
 
     if (ECART <= 0)
     {
-        SGF::Debug::getInstance()->add(SGF::Exception,"Mauvaise récupération de la taille de l'écran");
+        //SGF::Debug::getInstance()->add(SGF::Exception,"Mauvaise récupération de la taille de l'écran");
     }
 
-    SGF::Debug* dbg = SGF::Debug::getInstance();
+    //SGF::Debug* dbg = SGF::Debug::getInstance();
 
     try
     {
@@ -104,7 +104,7 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
     {
         std::ostringstream os;
         os << "Création de la fenêtre principale : " << e.what();
-        dbg->add(SGF::Exception,os.str());
+        //dbg->add(SGF::Exception,os.str());
         throw(e);
     }
 
@@ -163,15 +163,15 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
 
 void FenetreSGF::ouvrirFichier()
 {
-    SGF::Debug* dbg = SGF::Debug::getInstance();
-    dbg->add(SGF::Normal,"Ouverture du fichier");
+    //SGF::Debug* dbg = SGF::Debug::getInstance();
+    //dbg->add(SGF::Normal,"Ouverture du fichier");
 
     QString fichier = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", QString(), "Fichier SGF (*.sgf)");
     QMessageBox::information(this, "Fichier", "Vous avez sélectionné :\n" + fichier);
-    dbg->add(SGF::Normal,"Fichier : "+ fichier.toStdString());
+    //dbg->add(SGF::Normal,"Fichier : "+ fichier.toStdString());
     m_goban->getPartie()->chargerFichier(fichier.toStdString());
     m_goban->setCourant(-1);
-    m_goban->setHasPartie(true);
+    //m_goban->setHasPartie(true);
 
     //infosNoir->setJoueur(m_goban->getPartie().getNoir());
     //infosBlanc->setJoueur(m_goban->getPartie().getBlanc());
@@ -187,8 +187,8 @@ Sinon on crée une nouvelle ActionNext qu'on met dans la pile
 ***/
 void FenetreSGF::nextMove()
 {
-    SGF::Debug* dbg = SGF::Debug::getInstance();
-    dbg->add(SGF::Normal,"\n * Click:nextMove");
+    //SGF::Debug* dbg = SGF::Debug::getInstance();
+    //dbg->add(SGF::Normal,"\n * Click:nextMove");
     std::cout << "next move. goban.courant = " << m_goban->getCourant() << std::endl;
 
     if (pileUndo->canRedo())
@@ -198,15 +198,15 @@ void FenetreSGF::nextMove()
     else if ((m_goban->getPartie().get()!=0) && (m_goban->getCourant()!=m_goban->getPartie()->getListeCoups().size()))
     {
         std::cout << "Ajout dans la pile undoStack" << std::endl;
-        dbg->add(SGF::Normal,"Création d'un new ActionNext");
+        //dbg->add(SGF::Normal,"Création d'un new ActionNext");
         ActionNext* an = new ActionNext();
         an->setFenetrePrincipalePtr(sharedFromThis());
-        dbg->add(SGF::Normal,"Push dans la pile UndoStack");
+        //dbg->add(SGF::Normal,"Push dans la pile UndoStack");
         pileUndo->push(an);
-        dbg->add(SGF::Normal,an->text().toStdString());
+        //dbg->add(SGF::Normal,an->text().toStdString());
 
     }
-    dbg->add(SGF::Normal," * fin nextMove\n");
+    //dbg->add(SGF::Normal," * fin nextMove\n");
 
 }
 
@@ -215,7 +215,7 @@ void FenetreSGF::fermerFichier()
     //delete Partie;
     pileUndo->clear();
     //Partie.get()=0;
-    m_goban->setHasPartie(false);
+    //m_goban->setHasPartie(false);
     m_goban->init();
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
     infosBlanc->setNom(" "); infosBlanc->setNiveau(" ");
@@ -246,50 +246,50 @@ void FenetreSGF::debutPartie()
     m_goban->setCourant(0);
     commentaires->setText("Début de la partie.\n Partie jouée le "+m_goban->getPartie()->getDate());
 
-    SGF::Debug::getInstance()->add(SGF::Normal,"\nRetour au début de la partie, nettoyage de la pile d'Undo/Redo, init du goban.\n\n");
+    //SGF::Debug::getInstance()->add(SGF::Normal,"\nRetour au début de la partie, nettoyage de la pile d'Undo/Redo, init du goban.\n\n");
 
 }
 
 void FenetreSGF::next5Moves()
 {
-    if (m_goban->hasPartie())
-    {
+    //if (m_goban->hasPartie())
+    //{
         for (unsigned int i = 0; i<5; i++)
             FenetreSGF::nextMove();
-    }
+    //}
 }
 
 void FenetreSGF::finPartie()
 {
-    if (m_goban->hasPartie())
-    {
+    //if (m_goban->hasPartie())
+    //{
         while (m_goban->getCourant()!=m_goban->getPartie()->getListeCoups().size())
             FenetreSGF::nextMove();
-    }
+    //}
 }
 
 void FenetreSGF::enregistrerFichier()
 {
-    if (m_goban->hasPartie())
-    {
+    //if (m_goban->hasPartie())
+    //{
         QString nomFich = QFileDialog::getSaveFileName(this, "Enregistrer un fichier", QString(), "SGF (*.sgf)");
         if (nomFich.size()!=0)
             m_goban->getPartie()->enregistrerFichier(nomFich);
-    }
+    //}
 }
 
 void FenetreSGF::nouveauFichier()
 {
     /*** ouverture d'une boîte de dialogue pour demander le nom des joueurs, leur niveau,
     la date de la partie ***/
-    if (m_goban->hasPartie())
-    {
+    //if (m_goban->hasPartie())
+    //{
         enregistrerFichier();
         fermerFichier();
         FenetreInfos* fi = new FenetreInfos(this);
         fi->show();
-    }
-    else
+    //}
+    //else
     {
         FenetreInfos* fi = new FenetreInfos(this);
         fi->show();

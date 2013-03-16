@@ -1,5 +1,5 @@
 #include "Partie.h"
-#include "../Tools/debug.h"
+//#include "../Tools/debug.h"
 #include "../Tools/CoupException.h"
 
 using namespace std;
@@ -8,8 +8,8 @@ using namespace std;
 /***** Chargement d'un SGF *****/
 void Partie::chargerFichier(string const& f)
 {
-    SGF::Debug* dbg = SGF::Debug::getInstance();
-    dbg->add(SGF::Normal,"Chargement de la Partie. \n");
+    //SGF::Debug* dbg = SGF::Debug::getInstance();
+    //dbg->add(SGF::Normal,"Chargement de la Partie. \n");
     int numero = 1; //sert à numéroter les coups au fur et à mesure qu'on lit le fichier
 
     /********** Ouverture du fichier et test **************/
@@ -69,8 +69,8 @@ void Partie::chargerFichier(string const& f)
 //        m_joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
         m_joueurNoir.reset(new Joueur(QString::fromStdString(jnoir),QString::fromStdString(nnoir),"noir"));
         m_joueurBlanc.reset(new Joueur(QString::fromStdString(jblanc),QString::fromStdString(nblanc),"blanc"));
-        dbg->add(SGF::Normal,"Joueur Noir : "+jnoir+" "+nnoir);
-        dbg->add(SGF::Normal,"Joueur Blanc : "+jblanc+" "+nblanc+"\n");
+        //dbg->add(SGF::Normal,"Joueur Noir : "+jnoir+" "+nnoir);
+        //dbg->add(SGF::Normal,"Joueur Blanc : "+jblanc+" "+nblanc+"\n");
 
         /***  init en attendant que les infos de la Partie fonctionnent  ***/
         //joueurNoir = Noir::donneInstance("Noir","NiveauNoir");
@@ -120,7 +120,7 @@ void Partie::chargerFichier(string const& f)
             else m_coups.back().setJoueur(m_joueurBlanc);
             m_coups.back().setNum(numero);
             numero++;
-            dbg->add(SGF::Normal,m_coups.back().print());
+            //dbg->add(SGF::Normal,m_coups.back().print());
             if (contenu[i]==')') break;
             if (contenu[i]=='&') i++;
             if (contenu[i]!=';') i++;
@@ -129,7 +129,7 @@ void Partie::chargerFichier(string const& f)
 
         //courant = debut();
     }
-    else dbg->add(SGF::Exception,"Ce fichier n'existe pas.\n");
+    //else //dbg->add(SGF::Exception,"Ce fichier n'existe pas.\n");
 }
 
 void Partie::init(QString const& noirNom, QString const& blancNom, QString const& noirNiveau, QString const& blancNiveau, QString const& partieDate)

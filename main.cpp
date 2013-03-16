@@ -1,5 +1,5 @@
 #include "Lanceur/Lanceur.h"
-#include "Tools/debug.h"
+//#include "Tools/debug.h"
 
 int main(int argc, char *argv[])
 {

@@ -1,5 +1,5 @@
 #include "goban.h"
-#include "../Tools/debug.h"
+//#include "../Tools/debug.h"
 #include "../FenetrePrincipale/FenetrePrincipale.h"
 #include "../Tools/CoupException.h"
 

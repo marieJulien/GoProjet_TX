@@ -18,8 +18,6 @@ SOURCES += \
     FenetrePrincipale/FenetrePrincipale.cpp \
     FenetrePrincipale/FenetreSGF.cpp \
     FenetrePrincipale/InfosJoueur.cpp \
-    GobanFiles/GobanManager.cpp \
-    Partie/PartieManager.cpp \
     FenetrePrincipale/FenetreJeu.cpp \
     FenetrePrincipale/DebutJeu.cpp \
     GobanFiles/GobanIA.cpp \
@@ -55,7 +53,6 @@ HEADERS += \
     Tools/CoupException.h \
     \
     Lanceur/Lanceur.h \
-    GobanFiles/GobanManager.h \
     FenetrePrincipale/DebutJeu.h \
     Partie/PartieIA.h \
     GobanFiles/GobanIA.h \

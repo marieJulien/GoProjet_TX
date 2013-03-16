@@ -7,7 +7,7 @@
 #include <boost/enable_shared_from_this.hpp>
 
 
-#include "../Tools/Debug.h"
+//#include "../Tools/Debug.h"
 #include "../GobanFiles/Goban.h"
 #include "BoutonGoban.h"
 #include "InfosJoueur.h"
@@ -98,7 +98,7 @@ public:
     try { return QApplication::notify(receiver, event);}
     catch(std::exception& e)
     {
-        SGF::Debug::getInstance()->add(SGF::Exception,e.what());
+        //SGF::Debug::getInstance()->add(SGF::Exception,e.what());
         qCritical() << "Exception thrown:" << e.what();
     }
     return false;
