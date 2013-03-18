@@ -22,6 +22,7 @@ public :
     int getStatut() const {return statut;}
     unsigned int nbLibertes() const;
     unsigned int nbLibertesInternes() const;
+    std::set<std::pair<int,int> > libertesInternes() const;
     std::vector<boost::shared_ptr<Pierre> >& getPierres() {return m_pierres;}
     void capture();
     void ajouterPierre(boost::shared_ptr<Pierre> p);

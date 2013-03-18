@@ -41,6 +41,7 @@ public :
     static QPen getRouge();
     QGraphicsItemGroup* getLignes() const {return lignes;}
     boost::shared_ptr<QGraphicsEllipseItem> getCoupCourant() {return coupCourant;}
+    boost::shared_ptr<QGraphicsEllipseItem> getKo() {return koItem;}
 
 
     ~Goban() {}
@@ -56,6 +57,7 @@ public :
     // SETTERS
     void setCourant(int num) {m_courant=num;}
     void setCoupCourant(boost::shared_ptr<QGraphicsEllipseItem> q) {coupCourant=q;}
+    void setKo(boost::shared_ptr<QGraphicsEllipseItem> k) {koItem = k;}
 
 
     std::string printPlateau() const;
@@ -88,6 +90,7 @@ protected :
     boost::shared_ptr<Partie> m_partie; //partie posée sur le plateau
     boost::shared_ptr<QGraphicsEllipseItem> coupCourant; //cercle rouge pour indiquer le dernier coup joué
     int m_courant; //indice du dernier coup joué, dans le vecteur de coups de la classe Partie
+    boost::shared_ptr<QGraphicsEllipseItem> koItem; //indique un coup interdit à cause du ko
 
 
 

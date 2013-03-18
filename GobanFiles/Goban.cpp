@@ -85,6 +85,7 @@ Goban::Goban(Goban const& g)
 {
     Goban::Goban(g.M_SIZE);
     coupCourant = g.coupCourant; m_courant=g.m_courant;
+    koItem = g.koItem;
 }
 
 void Goban::init()
@@ -94,6 +95,7 @@ void Goban::init()
     {
         removeItem((*it).second->getEllipse().get());
     }
+    coupCourant.reset();
     m_courant = -1;
     m_groupes.clear();
 }

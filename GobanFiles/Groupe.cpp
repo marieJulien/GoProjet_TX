@@ -28,8 +28,14 @@ unsigned int Groupe::nbLibertes() const
     return libertes.size();
 }
 
-//renvoie le nombre de libertés internes du groupe
 unsigned int Groupe::nbLibertesInternes() const
+{
+    return libertesInternes().size();
+}
+
+
+//renvoie la liste des libertés internes du groupe
+std::set<pair<int,int> > Groupe::libertesInternes() const
 {
     //unsigned int result=0;
     set<pair<int,int> > libertes;
@@ -70,7 +76,7 @@ unsigned int Groupe::nbLibertesInternes() const
         }
     }
 
-    return libertes.size();
+    return libertes;
 }
 
 bool Groupe::faitPartie(const boost::shared_ptr<Pierre> p) const

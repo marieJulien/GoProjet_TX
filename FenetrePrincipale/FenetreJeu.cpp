@@ -111,7 +111,8 @@ void FenetreJeu::bouton_goban(int a, int o)
                     c.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
                     gobanPtr->getPartieIA()->ajouterCoup(c);
                     boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,gobanPtr->ECART()));
-                    int nbPierresCapturees = gobanPtr->ajouterPierre(pierrePtr).size();
+                    std::vector<boost::shared_ptr<Pierre> > pierresCaptures = gobanPtr->ajouterPierre(pierrePtr);
+                    int nbPierresCapturees = pierresCaptures.size();
                     joueurUser->addCapt(nbPierresCapturees);
                     std::ostringstream nbCapt;
                     nbCapt << joueurUser->getCapt();
@@ -119,6 +120,9 @@ void FenetreJeu::bouton_goban(int a, int o)
 
 
                     std::cout << "coup de l'utilisateur : ok, maintenant choix de l'ia\n";
+
+                    //gestion du ko éventuel :
+                    gobanPtr->gestionKo(pierresCaptures);
 
                     //ensuite, l'IA doit choisir un coup
                     tourIA();
@@ -192,7 +196,7 @@ void FenetreJeu::passer()
                     Coup c(-1,-1,joueurUser);
                     c.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
                     gobanPtr->getPartieIA()->ajouterCoup(c);
-
+                    gobanPtr->gestionKo(std::vector<boost::shared_ptr<Pierre> >());
                     //au tour de l'IA
                     tourIA();
                 }
@@ -245,6 +249,7 @@ void FenetreJeu::tourIA()
             Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
             c2.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
             gobanPtr->getPartieIA()->ajouterCoup(c2);
+            gobanPtr->gestionKo(std::vector<boost::shared_ptr<Pierre> >());
         }
 
     }
@@ -254,8 +259,17 @@ void FenetreJeu::tourIA()
         c2.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
         gobanPtr->getPartieIA()->ajouterCoup(c2);
         boost::shared_ptr<Pierre> pierre2 (new Pierre(c2,gobanPtr->ECART()));
-        int nbPierresCapturees = gobanPtr->ajouterPierre(pierre2).size();
+
+        std::vector<boost::shared_ptr<Pierre> > pierresCaptures = gobanPtr->ajouterPierre(pierre2);
+        gobanPtr->gestionKo(pierresCaptures);
+
+        int nbPierresCapturees = pierresCaptures.size();
         gobanPtr->getPartieIA()->getIA()->addCapt(nbPierresCapturees);
+        std::ostringstream nbCapt;
+        nbCapt << gobanPtr->getPartieIA()->getIA()->getCapt();
+        getInfos(gobanPtr->getPartieIA()->getCouleurIA())->setCapt(QString::fromStdString(nbCapt.str()));
+
+
     }
 
     passButton->setEnabled(true);

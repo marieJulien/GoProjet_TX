@@ -111,18 +111,22 @@ std::string PartieIA::resultat(boost::shared_ptr<GobanIA> goban)
     boost::shared_ptr<IA> IA = getIA();
     boost::shared_ptr<User> User = getUser();
     std::cout << "getIA et getUser done\n";
+    std::set<std::pair<int,int> > intersectionsComptees; //permet de ne pas compter deux fois un point
 
     for(std::set<boost::shared_ptr<Groupe> >::iterator it = goban->getGroupes().begin(); it != goban->getGroupes().end(); it++)
     {
         boost::shared_ptr<Groupe> groupePtr = *it;
-        int libertesInternes = groupePtr->nbLibertesInternes();
-        if (groupePtr->couleur()==IA->couleur())
+        std::set<std::pair<int,int> > libertesInternes = groupePtr->libertesInternes();
+        for(std::set<std::pair<int,int> >::iterator it_l = libertesInternes.begin(); it_l!= libertesInternes.end(); it_l++)
         {
-            pointsIA += libertesInternes;
-        }
-        else if (groupePtr->couleur()==User->couleur())
-        {
-            pointsUser += libertesInternes;
+
+            if (intersectionsComptees.find(*it_l)==intersectionsComptees.end())
+            {
+                if (groupePtr->couleur()==IA->couleur())
+                    pointsIA++;
+                else pointsUser++;
+                intersectionsComptees.insert(*it_l);
+            }
         }
     }
 

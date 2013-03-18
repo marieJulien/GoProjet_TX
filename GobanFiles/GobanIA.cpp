@@ -6,6 +6,7 @@ GobanIA::GobanIA(double ecart, int size) : Goban(ecart,size)
 {
     boost::shared_ptr<PartieIA> partiePtr (new PartieIA());
     m_partie = partiePtr;
+    m_ko = std::pair<int,int>(-1,-1);
 }
 
 void GobanIA::init()
@@ -41,6 +42,11 @@ bool GobanIA::coupPossible(int abs, int ord)
         }
         else
         {
+            if (ko())
+            {
+                if ((m_ko.first==abs) && (m_ko.second==ord))
+                    return false;
+            }
             boost::shared_ptr<Pierre> p;
             if ("noir"==getPartieIA()->couleurAJouer())
             {
@@ -116,4 +122,53 @@ void GobanIA::ajouterGroupe(boost::shared_ptr<Groupe> groupePtr)
 {
     m_groupes.insert(groupePtr);
     groupePtr->setGoban(sharedFromThis());
+}
+
+
+/** Gestion du ko sur le goban : méthode appelée à la fin du tour d'un joueur (user ou ia)
+  * Si ko!=(-1,-1) -> remettre le ko à (-1,-1)
+  * Sinon :
+  *     Si pierresCaptures.size()==1 (si on a capturé plus d'une pierre, on ne peut pas être dans une situation de ko)
+  *         a = abscisse(pierreCapturée), o = ordonnée ; si jouer en (a,o) capture la pierre qui vient d'être posée,
+  *         alors on est en situation de ko : il faut interdire pour le prochain tour de jouer en (a,o)
+  */
+void GobanIA::gestionKo(std::vector<boost::shared_ptr<Pierre> > pierresCapturees)
+{
+    if (m_ko.first!=-1)
+    {
+        m_ko.first=-1;
+        m_ko.second = -1;
+        koItem.reset();
+    }
+    else
+    {
+        if (pierresCapturees.size()==1)
+        {
+            int a = pierresCapturees.at(0)->getCoup().getAbs(), o = pierresCapturees.at(0)->getCoup().getOrd();
+            Coup c (a,o,getPartieIA()->getJoueur(getPartieIA()->couleurAJouer()));
+            boost::shared_ptr<Pierre> p;
+            c.setNum(getPartieIA()->getListeCoups().size());
+            p.reset(new Pierre(c,M_ECART));
+            m_copie.reset(new GobanIA(5,9));
+            m_copie->m_partie=m_partie;
+            m_copie->copieGroupes(sharedFromThis());
+            if ((m_copie->coupPossible(a,o)) && (m_copie->ajouterPierre(p,false).size()==1))
+            {
+                //alors il y a situation de ko !
+                std::cout << "KO ! ! ! \n\n";
+                m_ko.first = a; m_ko.second = o;
+                QRect rect((a+1)*M_ECART-(M_ECART*0.31),(o+1)*M_ECART-(M_ECART*0.31),M_ECART*0.6,M_ECART*0.6);
+
+                QPen blackPen(Qt::black,1.5);
+                koItem.reset(this->addEllipse(rect,blackPen));
+                koItem->setZValue(10);
+            }
+        }
+    }
+}
+
+
+bool GobanIA::ko() const
+{
+    return (m_ko.first!=-1);
 }
