@@ -14,8 +14,8 @@ public :
     void tourIA();
     boost::shared_ptr<FenetreJeu> sharedFromThis_Jeu()
     {
-        std::cout << "OOOOOOOOOO";
-        return  boost::shared_dynamic_cast<FenetreJeu,FenetrePrincipale>(shared_from_this());
+        //std::cout << "OOOOOOOOOO";
+        return  boost::dynamic_pointer_cast<FenetreJeu>(shared_from_this());
     }
 
 public slots :
@@ -25,7 +25,7 @@ public slots :
 
 
 private :
-    boost::shared_ptr<GobanIA> m_goban;
+    //boost::shared_ptr<GobanIA> m_goban;
     QPushButton* resignButton;
     QPushButton* passButton;
 };

@@ -16,11 +16,19 @@ class ResultatPartie : public QWidget
     Q_OBJECT
 
 public :
-    ResultatPartie(boost::shared_ptr<FenetreJeu> fenetreJeu);
+    ResultatPartie();
+    void init(boost::shared_ptr<FenetreJeu> fenetreJeu);
 
 public slots :
     void quitter();
     void recommencer();
+
+private :
+    QVBoxLayout* layoutVertical;
+    QHBoxLayout* layoutBoutons;
+
+    QPushButton* boutonQuitter;
+    QPushButton* boutonRecommencer;
 };
 
 

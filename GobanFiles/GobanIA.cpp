@@ -28,10 +28,12 @@ void GobanIA::init()
 
 bool GobanIA::coupPossible(int abs, int ord)
 {
+    std::cout << "GobanIA::CoupPossible\n";
     try
     {
         std::pair<int,int> coord (abs,ord);
         std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
+        std::cout << "getPlateau : done\n";
 
         if ((plateau.find(coord)!=plateau.end()) || (abs < 0) || (abs > 9) || (ord < 0) || (ord > 9))
         {
@@ -42,19 +44,26 @@ bool GobanIA::coupPossible(int abs, int ord)
             boost::shared_ptr<Pierre> p;
             if ("noir"==getPartieIA()->couleurAJouer())
             {
+                if (m_partie->getNoir().get()==0) std::cout << "ERREUR : POINTEUR SUR NOIR DANS PARTIE = 0\n\n";
                 Coup c(abs,ord, m_partie->getNoir());
+                std::cout << "get noir : done\n";
                 c.setNum(getPartieIA()->getListeCoups().size());
-                p.reset(new Pierre(c,ECART()));
+                std::cout << "get partie IA : done\n";
+                p.reset(new Pierre(c,M_ECART));
             }
             else
             {
                 Coup c(abs,ord, m_partie->getBlanc());
                 c.setNum(getPartieIA()->getListeCoups().size());
-                p.reset(new Pierre(c,ECART()));
+                p.reset(new Pierre(c,M_ECART));
             }
+            std::cout << "AAAAAAAAAAAAAA\n";
             m_copie.reset(new GobanIA(5,9));
+            std::cout << "m_copie.reset : done\n";
             m_copie->m_partie=m_partie;
             m_copie->copieGroupes(sharedFromThis());
+            std::cout << "copie groupes : ok\n";
+
             try
             {
                 m_copie->ajouterPierre(p,false);

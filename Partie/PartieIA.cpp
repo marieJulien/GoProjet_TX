@@ -13,7 +13,7 @@ PartieIA::PartieIA(std::string couleurIA,int handicap,double komi)
 
 void PartieIA::init(boost::shared_ptr<GobanIA> gobanPtr)
 {
-//    std::cout << "init partie ia\n";
+    std::cout << "init partie ia\n";
 
     try
     {
@@ -106,10 +106,11 @@ bool PartieIA::partieFinie(boost::shared_ptr<GobanIA> gobanPtr)
 
 std::string PartieIA::resultat(boost::shared_ptr<GobanIA> goban)
 {
+    std::cout << "PartieIA::resultat : Calcul du résultat de la partie\n";
     double pointsIA = 0, pointsUser = 0;
     boost::shared_ptr<IA> IA = getIA();
     boost::shared_ptr<User> User = getUser();
-    std::cout << "Calcul du résultat de la partie\n";
+    std::cout << "getIA et getUser done\n";
 
     for(std::set<boost::shared_ptr<Groupe> >::iterator it = goban->getGroupes().begin(); it != goban->getGroupes().end(); it++)
     {

@@ -71,6 +71,12 @@ public :
     //void setPartie(boost::shared_ptr<partie> p) {Partie = p;}
     infosJoueurs* getInfosNoir() const {return infosNoir;}
     infosJoueurs* getInfosBlanc() const {return infosBlanc;}
+    infosJoueurs* getInfos(std::string const& couleur)
+    {
+        if (couleur=="noir") return infosNoir;
+        else return infosBlanc;
+    }
+
     QTextEdit* getComm() const {return commentaires;}
 
     boost::shared_ptr<Goban> getGoban() {return m_goban;}

@@ -12,7 +12,20 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
     qreal m_height = desk.height();
     ECART = ceil((m_height-150)/(10));
     m_goban.reset(new GobanIA(ECART,9));
-    //    m_goban->init();
+    boost::shared_ptr<GobanIA> gobanIA = boost::dynamic_pointer_cast<GobanIA>(m_goban);
+    gobanIA->init();
+    if (gobanIA->getPartieIA()->getCouleurIA()=="noir")
+    {
+        infosNoir->setNom(QString("IA"));
+        infosBlanc->setNom(QString("Utilisateur"));
+    }
+    else
+    {
+        infosBlanc->setNom(QString("IA"));
+        infosNoir->setNom(QString("Utilisateur"));
+    }
+    infosNoir->setCapt(QString("0"));
+    infosBlanc->setCapt(QString("0"));
 
     vue = new QGraphicsView(m_goban.get());
     vue->setFixedSize(ECART*(m_goban->SIZE()+1),ECART*(m_goban->SIZE()+1));
@@ -69,6 +82,9 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
 
     connect(resignButton,SIGNAL(clicked()),this,SLOT(abandon()));
     connect(passButton,SIGNAL(clicked()),this,SLOT(passer()));
+
+
+    widgetsCote->addSpacing(400);
 }
 
 
@@ -84,6 +100,9 @@ void FenetreJeu::bouton_goban(int a, int o)
             if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
             {
                 //si c'est bien à l'utilisateur de jouer
+                passButton->setEnabled(false);
+                resignButton->setEnabled(false);
+
                 if (gobanPtr->coupPossible(a,o))
                 {
                     std::cout << "\ncoup utilisateur possible\n";
@@ -94,6 +113,10 @@ void FenetreJeu::bouton_goban(int a, int o)
                     boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,gobanPtr->ECART()));
                     int nbPierresCapturees = gobanPtr->ajouterPierre(pierrePtr).size();
                     joueurUser->addCapt(nbPierresCapturees);
+                    std::ostringstream nbCapt;
+                    nbCapt << joueurUser->getCapt();
+                    getInfos(joueurUser->couleur())->setCapt(QString::fromStdString(nbCapt.str()));
+
 
                     std::cout << "coup de l'utilisateur : ok, maintenant choix de l'ia\n";
 
@@ -140,6 +163,8 @@ void FenetreJeu::passer()
             if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
             {
                 //si c'est bien à l'utilisateur de jouer
+                passButton->setEnabled(false);
+                resignButton->setEnabled(false);
 
                 Coup dernierCoup = gobanPtr->getPartieIA()->getListeCoups().back();
                 if (dernierCoup.getAbs()==-1)
@@ -147,11 +172,12 @@ void FenetreJeu::passer()
                     //l'IA a passé au coup d'avant : deux passes de suite = fin de la partie, il faut compter les points
                     //pas encore géré
                     //compter les scores, afficher une fenêtre d'info
-                    std::cout << "AAAAAAAAAAAAAAAAA\n";
+                    std::cout << "Coup précédent = passer\n";
                     try
                     {
-                        ResultatPartie* res = new ResultatPartie(sharedFromThis_Jeu());
-                        std::cout << "EEEEEEEEEEEEE";
+                        ResultatPartie* res = new ResultatPartie();
+                        res->init(sharedFromThis_Jeu());
+                        std::cout << "Création de la fenêtre de résultat : ok\n";
                         res->show();
                     }
                     catch(std::exception const& e)
@@ -203,7 +229,8 @@ void FenetreJeu::tourIA()
             std::cout << "AAAAAAAAAAAAAAAAA\n";
             try
             {
-                ResultatPartie* res = new ResultatPartie(sharedFromThis_Jeu());
+                ResultatPartie* res = new ResultatPartie();
+                res->init(sharedFromThis_Jeu());
                 std::cout << "EEEEEEEEEEEEE";
                 res->show();
             }
@@ -230,4 +257,7 @@ void FenetreJeu::tourIA()
         int nbPierresCapturees = gobanPtr->ajouterPierre(pierre2).size();
         gobanPtr->getPartieIA()->getIA()->addCapt(nbPierresCapturees);
     }
+
+    passButton->setEnabled(true);
+    resignButton->setEnabled(true);
 }

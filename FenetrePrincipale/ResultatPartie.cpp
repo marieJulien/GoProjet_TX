@@ -4,22 +4,12 @@
 #include <QLabel>
 #include <QPushButton>
 
-ResultatPartie::ResultatPartie(boost::shared_ptr<FenetreJeu> fenetreJeu) : QWidget()
+ResultatPartie::ResultatPartie() : QWidget()
 {
-    std::cout << "eeeeeeeeeee";
-    if (fenetreJeu.get()==0) std::cout << "NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n\n";
-    boost::shared_ptr<GobanIA> goban = boost::dynamic_pointer_cast<GobanIA>(fenetreJeu->getGoban());
-
-    std::cout << "aaaaaaaaaaa";
-
-    QVBoxLayout* layoutVertical = new QVBoxLayout();
-    QHBoxLayout* layoutBoutons = new QHBoxLayout();
-    std::cout << "oooooooooooo";
-    QLabel* text = new QLabel(QString::fromStdString(goban->getPartieIA()->resultat(goban)));
-    QPushButton* boutonQuitter = new QPushButton("Quitter");
-    QPushButton* boutonRecommencer = new QPushButton("Rejouer");
-
-    std::cout << "iiiiiiiiii";
+    layoutVertical = new QVBoxLayout();
+    layoutBoutons = new QHBoxLayout();
+    boutonQuitter = new QPushButton("Quitter");
+    boutonRecommencer = new QPushButton("Rejouer");
 
     connect(boutonQuitter,SIGNAL(clicked()),this,SLOT(quitter()));
     connect(boutonRecommencer,SIGNAL(clicked()),this,SLOT(recommencer()));
@@ -27,12 +17,34 @@ ResultatPartie::ResultatPartie(boost::shared_ptr<FenetreJeu> fenetreJeu) : QWidg
     layoutBoutons->addWidget(boutonRecommencer);
     layoutBoutons->addWidget(boutonQuitter);
 
-    layoutVertical->addWidget(text);
     layoutVertical->addLayout(layoutBoutons);
 
-    this->setLayout(layoutVertical);
+    setLayout(layoutVertical);
 
-    //this->show;
+    std::cout << "Fenêtre de résultat créée\n";
+}
+
+void ResultatPartie::init(boost::shared_ptr<FenetreJeu> fenetreJeu)
+{
+    try
+    {
+        if (fenetreJeu.get()==0) std::cout << "ERREUR : POINTEUR NUL SUR FENETRE JEU ....\n\n";
+        std::cout << "Initialisation de la fenêtre de résultat\n";
+        boost::shared_ptr<Goban> gob = fenetreJeu->getGoban();
+        if (gob.get()==0) std::cout << "POINTEUR SUR GOBAN NUL\n"; //plante ici ...
+        boost::shared_ptr<GobanIA> goban = boost::dynamic_pointer_cast<GobanIA>(gob);
+        std::cout << "Calcul du résultat :\n";
+        if (goban.get()==0) std::cout << "ERREUR : POINTEUR SUR GOBAN NUL DANS FENETRE JEU\n\n";
+        boost::shared_ptr<PartieIA> partie = goban->getPartieIA();
+        if (partie.get()==0) std::cout << "ERREUR : POINTEUR SUR PARTIE IA NUL DANS GOBAN\n\n";
+        QLabel* text = new QLabel(QString::fromStdString(partie->resultat(goban)));
+        std::cout << "Calcul ok\n";
+        layoutVertical->insertWidget(0,text);
+    }
+    catch(std::exception const& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
 }
 
 void ResultatPartie::quitter()
